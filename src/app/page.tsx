@@ -12,10 +12,12 @@ type BookType = {
   desc: string;
   status: BookStatus;
   wait: string;
+  saved: boolean;
 };
 
 export default function Home() {
   const [compact, setCompact] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
   const [books, setBooks] = useState<BookType[]>(
     Array.from({ length: 15 }).map((_, i) => ({
       id: i + 1,
@@ -24,18 +26,51 @@ export default function Home() {
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur quis ultricies purus.',
       status: i % 3 === 0 ? 'available' : 'wait',
       wait: i % 3 === 0 ? 'Available now' : `${4 + i} week wait`,
+      saved: false,
     }))
   );
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 2500);
+  };
 
   const toggleHold = (id: number) => {
     setBooks((prev) =>
       prev.map((b) => {
         if (b.id !== id) return b;
-        if (b.status === 'available') return { ...b, status: 'borrowed' };
-        if (b.status === 'borrowed') return { ...b, status: 'available' };
-        if (b.status === 'wait') return { ...b, status: 'held' };
-        if (b.status === 'held') return { ...b, status: 'wait' };
+        if (b.status === 'available') {
+          showToast(`${b.title} borrowed`);
+          return { ...b, status: 'borrowed' };
+        }
+        if (b.status === 'borrowed') {
+          showToast(`${b.title} returned`);
+          return { ...b, status: 'available' };
+        }
+        if (b.status === 'wait') {
+          showToast(`hold placed on ${b.title}`);
+          return { ...b, status: 'held' };
+        }
+        if (b.status === 'held') {
+          showToast(`hold removed on ${b.title}`);
+          return { ...b, status: 'wait' };
+        }
         return b;
+      })
+    );
+  };
+
+  const toggleSave = (id: number) => {
+    setBooks((prev) =>
+      prev.map((b) => {
+        if (b.id !== id) return b;
+        const newSaved = !b.saved;
+        showToast(
+          newSaved
+            ? `${b.title} added to watch list`
+            : `${b.title} removed from watch list`
+        );
+        return { ...b, saved: newSaved };
       })
     );
   };
@@ -81,14 +116,15 @@ export default function Home() {
                 <article key={b.id} className={styles.cozyCard}>
                   <div className={styles.availPill}>
                     <span className={styles.waitText}>{b.wait}</span>
-                        <span
-                          className={`${styles.splitIcon} ${
-                            b.status === 'available' || b.status === 'borrowed'
-                              ? styles.splitTeal
-                              : styles.splitOrange
-                          }`}
-                        />
+                    <span
+                      className={`${styles.splitIcon} ${
+                        b.status === 'available' || b.status === 'borrowed'
+                          ? styles.splitTeal
+                          : styles.splitOrange
+                      }`}
+                    />
                   </div>
+
                   <h3 className={styles.cozyTitle}>{b.title}</h3>
                   <div className={styles.cozyRow}>
                     <div className={styles.cover}>
@@ -102,11 +138,20 @@ export default function Home() {
                       >
                         {getButtonLabel(b.status)}
                       </button>
-                      <button className={styles.linkBtn}>
+
+                      <button
+                        className={styles.linkBtn}
+                        onClick={() => showToast(`playing sample from ${b.title}`)}
+                      >
                         <Play size={16} /> &nbsp; Read Sample
                       </button>
-                      <button className={styles.linkBtn}>
-                        <Save size={16} /> &nbsp; Save
+
+                      <button
+                        className={styles.linkBtn}
+                        onClick={() => toggleSave(b.id)}
+                      >
+                        <Save size={16} /> &nbsp;
+                        {b.saved ? 'Remove from List' : 'Save'}
                       </button>
                     </div>
                   </div>
@@ -139,17 +184,33 @@ export default function Home() {
                   </div>
 
                   <div className={styles.rowBtns}>
-                    <button className={styles.iconBtn}>
-                      <Save size={18} />
+                    <button
+                      className={styles.iconBtn}
+                      onClick={() => toggleSave(b.id)}
+                      title={
+                        b.saved ? 'Remove from Watch List' : 'Save to Watch List'
+                      }
+                    >
+                      <Save
+                        size={18}
+                        color={b.saved ? '#00c7b5' : '#fff'}
+                        strokeWidth={b.saved ? 3 : 2}
+                      />
                     </button>
-                    <button className={styles.iconBtn}>
+
+                    <button
+                      className={styles.iconBtn}
+                      onClick={() => showToast(`playing sample from ${b.title}`)}
+                      title="Play Sample"
+                    >
                       <Play size={18} />
                     </button>
+
                     <button
                       className={`${styles.iconBtnPrimary} ${
                         b.status === 'wait' || b.status === 'held'
-                          ? styles.iconBtnHold     
-                          : styles.iconBtnBorrow   
+                          ? styles.iconBtnHold
+                          : styles.iconBtnBorrow
                       }`}
                       onClick={() => toggleHold(b.id)}
                       title={getButtonLabel(b.status)}
@@ -162,6 +223,8 @@ export default function Home() {
             </section>
           )}
         </main>
+
+        {toast && <div className={styles.toast}>{toast}</div>}
       </div>
     </div>
   );

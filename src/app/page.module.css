@@ -30,6 +30,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: relative;
 }
 
 /* header toggle */
@@ -152,7 +153,7 @@
 .cozyRow {
   display: flex;
   gap: 16px;
-  align-items: center;           
+  align-items: center;
 }
 .cover {
   width: 92px;
@@ -174,8 +175,8 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  justify-content: center;         
-  min-height: 128px;                
+  justify-content: center;
+  min-height: 128px;
 }
 .linkBtn {
   background: transparent;
@@ -209,8 +210,8 @@
   transition: background 0.2s ease;
 }
 .borrowTeal {
-  background: #009788;          
-  color: #f4f4f4;  
+  background: #009788;
+  color: #f4f4f4;
 }
 .borrowTeal:hover {
   filter: brightness(1.1);
@@ -285,19 +286,46 @@
 .iconBtnPrimary:hover {
   filter: brightness(1.05);
 }
-
-.splitOrangeTeal {
-  background: linear-gradient(35deg, var(--orange) 50%, var(--teal) 50%);
-}
-
 .iconBtnBorrow {
   background: linear-gradient(35deg, var(--teal) 50%, #000 50%);
-  text-shadow: 1 2 3px rgba(0,0,0,.9)
+  text-shadow: 1px 2px 3px rgba(0, 0, 0, 0.9);
 }
-
 .iconBtnHold {
   background: linear-gradient(35deg, var(--orange) 50%, #000 50%);
-  text-shadow: 1 2 3px rgba(0,0,0,.9)
+  text-shadow: 1px 2px 3px rgba(0, 0, 0, 0.9);
+}
+
+/* toast notification */
+.toast {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(17, 18, 22, 0.95);
+  border: 1px solid var(--line);
+  color: var(--text);
+  padding: 10px 18px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  font-size: 14px;
+  animation: toastFade 2.5s ease forwards;
+  pointer-events: none;
+  z-index: 999;
+}
+
+@keyframes toastFade {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+  10%, 85% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
 }
 
 .cozyTitle {
